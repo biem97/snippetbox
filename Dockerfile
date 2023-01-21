@@ -10,13 +10,18 @@ COPY . .
 # RUN RUN go build -v -o /usr/local/bin/app ./...
 RUN go build -ldflags="-s -w" -o /snippetbox ./cmd/web
 
+# Build cert
+RUN bash ./scripts/linux_generate_cert.bash
+
 # Build app image
 FROM golang:1.19 
 
 WORKDIR /usr/src/app
 
 COPY --from=app-builder /snippetbox /usr/local/bin/snippetbox 
-COPY --from=app-builder /usr/src/app/tls /usr/src/app/tls
-COPY --from=app-builder /usr/src/app/ui /usr/src/app/ui
+COPY --from=app-builder /usr/src/app/cert.pem ./tls/cert.pem
+COPY --from=app-builder /usr/src/app/key.pem ./tls/key.pem
+COPY --from=app-builder /usr/src/app/ui ./ui
+
 
 CMD ["snippetbox"]
