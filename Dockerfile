@@ -7,7 +7,6 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-# RUN RUN go build -v -o /usr/local/bin/app ./...
 RUN go build -ldflags="-s -w" -o /snippetbox ./cmd/web
 
 # Build cert
@@ -22,6 +21,5 @@ COPY --from=app-builder /snippetbox /usr/local/bin/snippetbox
 COPY --from=app-builder /usr/src/app/cert.pem ./tls/cert.pem
 COPY --from=app-builder /usr/src/app/key.pem ./tls/key.pem
 COPY --from=app-builder /usr/src/app/ui ./ui
-
 
 CMD ["snippetbox"]
