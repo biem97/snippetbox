@@ -20,6 +20,5 @@ WORKDIR /usr/src/app
 COPY --from=app-builder /snippetbox /usr/local/bin/snippetbox 
 COPY --from=app-builder /usr/src/app/cert.pem ./tls/cert.pem
 COPY --from=app-builder /usr/src/app/key.pem ./tls/key.pem
-COPY --from=app-builder /usr/src/app/ui ./ui
 
 CMD ["snippetbox"]

@@ -16,7 +16,10 @@ import (
 // then sends a generic 500 Internal Server Error response to the user.
 func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	app.errorLog.Output(2, trace)
+	logErr := app.errorLog.Output(2, trace)
+	if logErr != nil {
+		app.serverError(w, logErr)
+	}
 
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
@@ -114,5 +117,11 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 // Return true if the current request is from an authenticated user, otherwise
 // return false.
 func (app *application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+
+	if !ok {
+		return false
+	}
+
+	return isAuthenticated
 }
