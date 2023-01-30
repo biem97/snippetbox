@@ -47,3 +47,20 @@ func TestPing(t *testing.T) {
 ```bash
 go test -race ./cmd/web/
 ```
+
+# Integration test
+- Connect to MySQL as the root user and execute the following SQL statements to create a new `test_snippetbox` database and `test_web` user:
+```sql
+CREATE DATABASE test_snippetbox CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+```sql
+CREATE USER 'test_web'@'localhost';
+GRANT CREATE, DROP, ALTER, INDEX, SELECT, INSERT, UPDATE, DELETE ON test_snippetbox.* TO 'test_web'@'localhost';
+ALTER USER 'test_web'@'localhost' IDENTIFIED BY 'pass';
+```
+
+# Go
+- The Go tool ignores any directories called testdata , so these scripts will be
+ignored when compiling your application (it also ignores any directories or files which
+have names that begin with an _ or . character too).
