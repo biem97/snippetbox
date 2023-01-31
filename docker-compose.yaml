@@ -1,0 +1,41 @@
+version: "3.3"
+
+volumes:
+  mysql-volume:
+
+networks:
+  database:
+    driver: bridge
+
+services:
+  mysql:
+    image: 'bitnami/mysql:8.0.32'
+    restart: always
+    networks:
+      - database
+    environment:
+      MYSQL_ROOT_USER: my_root_user
+      MYSQL_ROOT_PASSWORD: my_root_password
+      MYSQL_DATABASE: snippetbox
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    volumes:
+      - ./sql/:/docker-entrypoint-initdb.d/
+      - mysql-volume:/bitnami/mysql/data
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:3306"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  snippetbox:
+    build:
+      context: ./
+    restart: on-failure
+    networks:
+      - database
+    command: snippetbox -addr=:4000 -dsn=my_user:my_password@tcp(mysql:3306)/snippetbox?parseTime=true
+    depends_on:
+      - mysql
+    ports:
+      - '4000:4000'
