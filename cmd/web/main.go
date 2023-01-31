@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -15,6 +14,7 @@ import (
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,16 +29,16 @@ type application struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP network address")
+	addr := flag.String("addr", ":8080", "HTTP network address")
 	// Define a new command-line flag for the MySQL DSN string.
-	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name (connection string)")
+	// dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name (connection string)")
 
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	db, err := openDB(*dsn)
+	db, err := openDB()
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -76,16 +76,16 @@ func main() {
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want the server to use.
 	// In this case the only thing that we're changing is the curve preferences value, so that only
 	// elliptic curves with assembly implementations are used.
-	tlsConfig := &tls.Config{
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-	}
+	// tlsConfig := &tls.Config{
+	// 	CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	// }
 
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
 		// Call the new app.routes() method to get the servemux containing our routes.
-		Handler:   app.routes(),
-		TLSConfig: tlsConfig,
+		Handler: app.routes(),
+		// TLSConfig: tlsConfig,
 		// Add Idle, Read and Write timeouts to the server
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
@@ -97,12 +97,25 @@ func main() {
 	// Use the ListenAndServeTLS() method to start the HTTPS server.
 	// We pass in the paths to the TLS certificate and corresponding private key
 	// as the two parameters
-	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
 
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+func openDB() (*sql.DB, error) {
+	// Capture connection properties.
+	cfg := mysql.Config{
+		User:                 os.Getenv("DB_USER"),
+		Passwd:               os.Getenv("DB_PASS"),
+		Net:                  "tcp",
+		Addr:                 os.Getenv("DB_ADDR"), // 127.0.0.1:3306
+		DBName:               os.Getenv("DB_NAME"),
+		AllowNativePasswords: true,
+		Params: map[string]string{
+			"parseTime": "true",
+		},
+	}
+
+	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		return nil, err
 	}

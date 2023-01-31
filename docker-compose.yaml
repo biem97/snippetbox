@@ -34,8 +34,8 @@ services:
     restart: on-failure
     networks:
       - database
-    command: snippetbox -addr=:4000 -dsn=my_user:my_password@tcp(mysql:3306)/snippetbox?parseTime=true
+    command: snippetbox -addr=:8080 -dsn=my_user:my_password@tcp(mysql:3306)/snippetbox?parseTime=true
     depends_on:
       - mysql
     ports:
-      - '4000:4000'
+      - '8080:8080'
