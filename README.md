@@ -1,7 +1,9 @@
 # Snippetbox
 
 Snippetbox is a simple way to share snippets and pastes of code with others. It allows users to create and share single files, parts of files, or full applications.
-This application is from the book `Let's Go` by `Alex Edwards` with some my personal enhancement.
+This application is a part from the book `Let's Go` by `Alex Edwards` with some my personal improvements and deployed.
+
+![app](assets/app.png)
 
 # How to run
 
