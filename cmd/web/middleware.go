@@ -103,8 +103,6 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		fmt.Println("isAuthenticatedContextKey: ", isAuthenticatedContextKey)
-
 		// If a matching user is found, we know we know that the request is
 		// coming from an authenticated user who exists in our database. We
 		// create a new copy of the request (with an isAuthenticatedContextKey

@@ -1,0 +1,13 @@
+# Reading list
+1.  [CSRF Attack](http://www.gnucitizen.org/blog/csrf-demystified/)
+2.  [Don’t fear the pointer](https://bitfieldconsulting.com/golang/pointers)
+3.  [Interfaces Explained](https://www.alexedwards.net/blog/interfaces-explained)
+4.  [Data Races vs Race Conditions](https://cronokirby.github.io/posts/data-races-vs-race-conditions/)
+5.  [Understanding Mutexes](https://www.alexedwards.net/blog/understanding-mutexes)
+5.  [Go 1.11 Modules](https://github.com/golang/go/wiki/Modules)
+6.  [Error Value FAQ](https://github.com/golang/go/wiki/ErrorValueFAQ)
+7.  [An Overview of Go’s Tooling](https://www.alexedwards.net/blog/an-overview-of-go-tooling)
+8.  [Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
+9.  [A Step-by-Step Guide to Go Internationalization & Localization](https://phraseapp.com/blog/posts/internationalization-i18n-go/)
+10. [Learning Go’s Concurrency Through Illustrations](https://medium.com/@trevor4e/learning-gos-concurrency-through-illustrations-8c4aff603b3)
+11. [How to write benchmarks in Go.](https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go) 
