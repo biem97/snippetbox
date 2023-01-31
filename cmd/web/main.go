@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -73,13 +74,6 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	// Initialize a tls.Config struct to hold the non-default TLS settings we want the server to use.
-	// In this case the only thing that we're changing is the curve preferences value, so that only
-	// elliptic curves with assembly implementations are used.
-	// tlsConfig := &tls.Config{
-	// 	CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-	// }
-
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
@@ -94,25 +88,41 @@ func main() {
 
 	infoLog.Printf("Starting server on %s", *addr)
 
-	// Use the ListenAndServeTLS() method to start the HTTPS server.
-	// We pass in the paths to the TLS certificate and corresponding private key
-	// as the two parameters
-	err = srv.ListenAndServe()
+	if os.Getenv("DEPLOY_ENV") == "flyctl" {
+		err = srv.ListenAndServe()
+	} else {
+		// Initialize a tls.Config struct to hold the non-default TLS settings we want the server to use.
+		// In this case the only thing that we're changing is the curve preferences value, so that only
+		// elliptic curves with assembly implementations are used.
+		tlsConfig := &tls.Config{
+			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		}
+
+		srv.TLSConfig = tlsConfig
+		// Use the ListenAndServeTLS() method to start the HTTPS server.
+		// We pass in the paths to the TLS certificate and corresponding private key
+		// as the two parameters
+		err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	}
+
 	errorLog.Fatal(err)
 }
 
 func openDB() (*sql.DB, error) {
 	// Capture connection properties.
 	cfg := mysql.Config{
-		User:                 os.Getenv("DB_USER"),
-		Passwd:               os.Getenv("DB_PASS"),
-		Net:                  "tcp",
-		Addr:                 os.Getenv("DB_ADDR"), // 127.0.0.1:3306
-		DBName:               os.Getenv("DB_NAME"),
-		AllowNativePasswords: true,
+		User:   os.Getenv("DB_USER"),
+		Passwd: os.Getenv("DB_PWD"),
+		Net:    "tcp",
+		Addr:   os.Getenv("DB_ADDR"), // 127.0.0.1:3306
+		DBName: os.Getenv("DB_NAME"),
 		Params: map[string]string{
 			"parseTime": "true",
 		},
+	}
+
+	if os.Getenv("DEPLOY_ENV") == "flyctl" {
+		cfg.AllowNativePasswords = true
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())

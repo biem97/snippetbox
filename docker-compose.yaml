@@ -9,24 +9,24 @@ networks:
 
 services:
   mysql:
-    image: 'bitnami/mysql:8.0.32'
+    image: "bitnami/mysql:8.0.32"
     restart: always
     networks:
       - database
     environment:
       MYSQL_ROOT_USER: my_root_user
       MYSQL_ROOT_PASSWORD: my_root_password
-      MYSQL_DATABASE: snippetbox
-      MYSQL_USER: my_user
-      MYSQL_PASSWORD: my_password
+      MYSQL_DATABASE: &db_name snippetbox
+      MYSQL_USER: &db_user my_user
+      MYSQL_PASSWORD: &db_pwd my_password
     volumes:
       - ./sql/:/docker-entrypoint-initdb.d/
       - mysql-volume:/bitnami/mysql/data
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:3306"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:3306"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   snippetbox:
     build:
@@ -34,8 +34,12 @@ services:
     restart: on-failure
     networks:
       - database
-    command: snippetbox -addr=:8080 -dsn=my_user:my_password@tcp(mysql:3306)/snippetbox?parseTime=true
     depends_on:
       - mysql
+    environment:
+      DB_USER: *db_user
+      DB_PWD: *db_pwd
+      DB_ADDR: mysql:3306
+      DB_NAME: *db_name
     ports:
-      - '8080:8080'
+      - "8080:8080"
