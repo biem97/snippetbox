@@ -91,7 +91,7 @@ func main() {
 
 	infoLog.Printf("Starting server on %s", *addr)
 
-	if os.Getenv("DEPLOY_ENV") == "flyctl" {
+	if os.Getenv("APP_ENV") == "cloud" {
 		err = srv.ListenAndServe()
 	} else {
 		// Initialize a tls.Config struct to hold the non-default TLS settings we want the server to use.
@@ -124,7 +124,7 @@ func openDB() (*sql.DB, error) {
 		},
 	}
 
-	if os.Getenv("DEPLOY_ENV") == "flyctl" {
+	if os.Getenv("APP_ENV") == "cloud" {
 		cfg.AllowNativePasswords = true
 	}
 

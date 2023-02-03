@@ -311,7 +311,7 @@ func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
 }
 
 type accountPasswordUpdateForm struct {
-	CurrentPassword         string `form:"CurrentPassword"`
+	CurrentPassword         string `form:"currentPassword"`
 	NewPassword             string `form:"newPassword"`
 	NewPasswordConfirmation string `form:"newPasswordConfirmation"`
 	validator.Validator     `form:"-"`
