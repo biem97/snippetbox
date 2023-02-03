@@ -142,7 +142,7 @@ func (m *UserModel) PasswordUpdate(id int, currentPassword, newPassword string) 
 		return err
 	}
 
-	err = bcrypt.CompareHashAndPassword(currentHashedPassword, []byte(currentHashedPassword))
+	err = bcrypt.CompareHashAndPassword(currentHashedPassword, []byte(currentPassword))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return ErrInvalidCredentials
