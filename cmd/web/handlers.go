@@ -25,6 +25,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl.html", data)
 }
 
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, http.StatusOK, "about.tmpl.html", data)
+}
+
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// When httprouter is parsing a request, the values of any named parameters
 	// will be stored in the request context. We'll talk about request context
@@ -245,6 +251,14 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	// 'logged in'.
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
+	// Use the PopString method to retrieve and remove a value from the session data
+	// in one step. If no matching key exists this will return the empty tring
+	path := app.sessionManager.PopString(r.Context(), "redirectPathAfterLogin")
+	if path != "" {
+		http.Redirect(w, r, path, http.StatusSeeOther)
+		return
+	}
+
 	// Redirect the user to the create snippet page.
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
@@ -275,4 +289,40 @@ func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.serverError(w, err)
 	}
+}
+
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+
+	user, err := app.users.Get(userID)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.User = user
+
+	app.render(w, http.StatusOK, "account.tmpl.html", data)
+}
+
+type accountPasswordUpdateForm struct {
+	CurrentPassword         string `form:"CurrentPassword"`
+	NewPassword             string `form:"newPassword"`
+	NewPasswordConfirmation string `form:"newPasswordConfirmation"`
+	validator.Validator     `form:"-"`
+}
+
+func (app *application) accountPasswordUpdate(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = accountPasswordUpdateForm{}
+
+	app.render(w, http.StatusOK, "password.tmpl.html", data)
+}
+
+func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
 }
